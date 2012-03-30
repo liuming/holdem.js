@@ -3,23 +3,92 @@
 var Holdem = function() {};
 
 Holdem.Game = function(id) {
-  var state = 0, players = [];
+  var self = this;
+  var state = 0, pot = 0, players = [], currentPlayer;
 
   this.id = function() { return id; };
+  this.pot = function() { return pot; };
+  this.hasSmallBlind = function() { return state & 2 === 0 ? false : true; };
+  this.hasBigBlind = function() { return state & 4 === 0 ? false : true; };
+  this.allPlayers = function() { return players.slice(); };
+  this.currentPlayer = function() { return currentPlayer; };
 
-  this.addPlayer = function(player) { players.push(player) };
-  this.start = function() {};
+  this.addPlayer = function(player) {
+    if (player instanceof Holdem.Player && players.indexOf(player) === -1) players.push(player);
+    return self.allPlayers();
+  };
+
+  this.removePlayer = function(player) {
+    var index = players.indexOf(player);
+    if (player instanceof Holdem.Player && index !== -1) players.splice(index, 1);
+    return self.allPlayers();
+  };
+
+  this.start = function() {
+    if (players.length <= 2) throw "Not enought player";
+
+    currentPlayer = players[0];
+    state |= 1;
+  };
+
+  this.availableActions = function() {
+    if (currentPlayer.isFolded()) return [];
+    if (self.hasSmallBlind() === false) return ['small', 'fold'];
+    if (self.hasBigBlind() === false) return ['big', 'fold'];
+
+    return ['call', 'raise', 'fold'];
+  };
+
+  this.bet = function(amount) {
+    currentPlayer.transfer(-1 * Math.abs(amount));
+    pot += amount;
+  };
+
+  this.smallBlind = function(amount) {
+    self.bet(amount);
+    state |= 2;
+  };
+
+  this.bigBlind = function(amount) {
+    self.bet(amount);
+    state |= 4;
+  };
+
+  this.check = function() {
+    nextPlayer();
+  };
+
+  this.call = function() {
+  };
+
+  this.raise = function(amount) {
+  };
+
+  this.fold = function() {
+    currentPlayer.fold();
+  };
+
+  var nextPlayer = function() {
+    var index = (players.indexOf(currentPlayer) + 1) % players.length;
+    return currentPlayer = players[index];
+  };
+
+  //Assign an id if it's not passed in
+  id = id || Holdem.randomInt();
 };
 
 Holdem.Player = function(name) {
-  var pot = 0, folded = false;
+  var id, credits = 0, state = 0;
 
+  this.id = function() { return id; };
   this.name = function() { return name; };
-  this.points = function() { return pot };
-  this.folded = function() { return folded };
+  this.credits = function() { return credits };
+  this.isFolded = function() { return (state & 2) === 0 ? false : true ;};
 
-  this.transfer = function(points) { pot += points };
-  this.fold = function() { folded = true };
+  this.transfer = function(amount) { credits += amount };
+  this.fold = function() { state |= 2 };
+
+  id = id || Holdem.randomInt();
 };
 
 Holdem.card = function() {
@@ -34,9 +103,9 @@ Holdem.card = function() {
 };
 
 Holdem.handInfo = function(cards) {
-  if (cards.length !== 5) throw "Number of cards is incorrect, must be 5.";
+  //if (cards.length !== 7) throw "Number of cards is incorrect, must be 7.";
 
-  var handBits = cards[0] | cards[1] | cards[2] | cards[3] | cards[4]; //Not to use loop for higher performance
+  var handBits = cards[0] | cards[1] | cards[2] | cards[3] | cards[4] | cards[5] | cards[6]; //Not to use loop for higher performance
   var suitsCount = 0, ranksCount = 0, suitsBits = handBits & 15, ranksBits = handBits >> 4 << 4;
 
   //Not to use loop for higher performance
@@ -59,6 +128,7 @@ Holdem.handInfo = function(cards) {
   ranksCount += (handBits & 65536) >> 16;
 
   //Detect the characteristic of a hand
+  //FIXME: this is for 5 cards game, not 7
   if (false) {
   } else if (ranksCount === 4) {
     return 'one_pair';
@@ -79,6 +149,10 @@ Holdem.handInfo = function(cards) {
   } else {
     return 'high_cards';
   }
+};
+
+Holdem.randomInt = function() {
+  return parseInt(Math.random() * 2147483647);
 };
 
 Holdem.suit = {

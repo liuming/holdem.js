@@ -3,6 +3,25 @@
 var assert = require('assert');
 var Holdem = require('./holdem.js').Holdem;
 
+var players = [], game = new Holdem.Game();
+
+var index = 0;
+while(index++ < 4) {
+  players.push(new Holdem.Player('Player' + index));
+};
+
+assert.deepEqual(game.addPlayer(players[0]), [players[0]]);
+assert.deepEqual(game.addPlayer(players[0]), [players[0]]);
+assert.deepEqual(game.addPlayer(players[1]), [players[0], players[1]]);
+assert.deepEqual(game.removePlayer(players[0]), [players[1]]);
+assert.deepEqual(game.addPlayer(players[2]), [players[1], players[2]]);
+assert.deepEqual(game.addPlayer(players[3]), [players[1], players[2], players[3]]);
+
+game.start();
+assert.equal(game.currentPlayer(), players[1]);
+game.check();
+assert.equal(game.currentPlayer(), players[2]);
+
 assert.equal(Holdem.card(), undefined);
 assert.equal(Holdem.card('2', 'spades'), 24);
 assert.deepEqual(Holdem.card(24), {suit: 'spades', rank: '2'});
