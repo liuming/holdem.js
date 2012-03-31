@@ -218,7 +218,12 @@ Holdem.hand.isThreeOfAKind = function(ranks) {
          false;
 };
 
-Holdem.hand.isTwoPair = function(cards) {
+Holdem.hand.isTwoPair = function(ranks) {
+  return (ranks[0] === ranks[1] && ranks[2] === ranks[3]) ||
+         (ranks[1] === ranks[2] && ranks[3] === ranks[4]) ||
+         (ranks[2] === ranks[3] && ranks[4] === ranks[5]) ||
+         (ranks[3] === ranks[4] && ranks[5] === ranks[6]) ||
+         false;
 };
 
 Holdem.suit = {

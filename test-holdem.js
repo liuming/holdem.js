@@ -36,6 +36,7 @@ assert.equal(Holdem.hand.isFullHouse([16, 16, 16, 32, 32, 64, 128, 256]), true);
 assert.equal(Holdem.hand.isFullHouse([16, 16, 16, 32, 64, 128, 256, 512]), false);
 assert.equal(Holdem.hand.isFlush([1, 1, 1, 1, 1, 2, 4, 8]), true);
 assert.equal(Holdem.hand.isStraight([16, 32, 64, 128, 256, 512, 1024]), true);
+assert.equal(Holdem.hand.isTwoPair([16, 16, 32, 32, 64, 128, 256]), true);
 
 /*
 assert.deepEqual(Holdem.hand([24, 40, 72, 136, 264]), 'straight_flush');
