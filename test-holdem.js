@@ -49,4 +49,7 @@ assert.deepEqual(Holdem.hand([17, 18, 33, 34, 65]), 'two_pair');
 assert.deepEqual(Holdem.hand([17, 18, 33, 66, 132]), 'one_pair');
 */
 
+assert.notEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
+assert.notDeepEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
+
 })();

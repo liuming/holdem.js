@@ -226,6 +226,19 @@ Holdem.hand.isTwoPair = function(ranks) {
          false;
 };
 
+Holdem.shuffle = function(deck) {
+  deck = deck.slice();
+  var times = 0;
+  while(times++ < 52) {
+    deck.splice(parseInt(Math.random() * 52), 0, deck.shift());
+  }
+  return deck;
+};
+
+Holdem.randomInt = function(range) {
+  return parseInt(Math.random() * (range | 2147483647));
+};
+
 Holdem.suit = {
   'spades'   : 8,
   'hearts'   : 4,
@@ -266,6 +279,8 @@ Holdem.rank = {
   65536 : 'A',
 };
 
+Holdem.deck = [ 17, 18, 20, 24, 33, 34, 36, 40, 65, 66, 68, 72, 129, 130, 132, 136, 257, 258, 260, 264, 513, 514, 516, 520, 1025, 1026, 1028, 1032, 2049, 2050, 2052, 2056, 4097, 4098, 4100, 4104, 8193, 8194, 8196, 8200, 16385, 16386, 16388, 16392, 32769, 32770, 32772, 32776, 65537, 65538, 65540, 65544 ];
+
 Holdem.hand.value = {
   'straight_flush'  : 8,
   'four_of_a_kind'  : 7,
@@ -278,9 +293,6 @@ Holdem.hand.value = {
   'high_cards'      : 0,
 };
 
-Holdem.randomInt = function() {
-  return parseInt(Math.random() * 2147483647);
-};
 
 exports.Holdem = Holdem;
 
