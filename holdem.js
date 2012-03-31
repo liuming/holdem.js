@@ -261,34 +261,12 @@ Holdem.rank = {
   65536 : 'A',
 };
 
-/*
-Holdem.flush = {
-  8: 'spades',
-  4: 'hearts',
-  2: 'clubs',
-  1: 'diamonds',
-};
-*/
-
-Holdem.hand.straight = {
-  126976 : ['A', 'K', 'Q', 'J', '10'],
-  63488  : ['K', 'Q', 'J', '10', '9'],
-  31744  : ['Q', 'J', '10', '9', '8'],
-  15872  : ['J', '10', '9', '8', '7'],
-  7936   : ['10', '9', '8', '7', '6'],
-  3968   : ['9', '8', '7', '6', '5' ],
-  1984   : ['8', '7', '6', '5', '4' ],
-  992    : ['7', '6', '5', '4', '3' ],
-  496    : ['6', '5', '4', '3', '2' ],
-  65776  : ['5', '4', '3', '2', 'A' ],
-};
-
 Holdem.hand.value = {
-  'straight_flush'   : 8,
+  'straight_flush'  : 8,
   'four_of_a_kind'  : 7,
   'full_house'      : 6,
   'flush'           : 5,
-  'straight'         : 4,
+  'straight'        : 4,
   'three_of_a_kind' : 3,
   'two_pair'        : 2,
   'one_pair'        : 1,
