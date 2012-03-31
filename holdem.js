@@ -73,7 +73,6 @@ Holdem.Game = function(id) {
     return currentPlayer = players[index];
   };
 
-  //Assign an id if it's not passed in
   id = id || Holdem.randomInt();
 };
 
@@ -94,7 +93,7 @@ Holdem.Player = function(name) {
 Holdem.card = function() {
   switch (typeof arguments[0]) {
     case 'number':
-      return {suit: Holdem.suit[arguments[0] & 15], rank: Holdem.rank[arguments[0] >> 4 << 4] };
+      return {suit: Holdem.suit[arguments[0] & 15], rank: Holdem.rank[arguments[0] & ~15] };
       break;
     case 'string':
       return Holdem.rank[arguments[0]] | Holdem.suit[arguments[1]];
@@ -102,57 +101,124 @@ Holdem.card = function() {
   }
 };
 
-Holdem.handInfo = function(cards) {
-  //if (cards.length !== 7) throw "Number of cards is incorrect, must be 7.";
+/*
+ * Some parts of this function are not using loop to get higher performance.
+ */
 
-  var handBits = cards[0] | cards[1] | cards[2] | cards[3] | cards[4] | cards[5] | cards[6]; //Not to use loop for higher performance
-  var suitsCount = 0, ranksCount = 0, suitsBits = handBits & 15, ranksBits = handBits >> 4 << 4;
+Holdem.hand = function(cards) {
+  if (cards.length !== 7) throw "The amount of cards is incorrect, must be 7.";
 
-  //Not to use loop for higher performance
-  suitsCount += (handBits & 1) >> 0;
-  suitsCount += (handBits & 2) >> 1;
-  suitsCount += (handBits & 4) >> 2;
-  suitsCount += (handBits & 8) >> 3;
-  ranksCount += (handBits & 16) >> 4;
-  ranksCount += (handBits & 32) >> 5;
-  ranksCount += (handBits & 64) >> 6;
-  ranksCount += (handBits & 128) >> 7;
-  ranksCount += (handBits & 256) >> 8;
-  ranksCount += (handBits & 512) >> 9;
-  ranksCount += (handBits & 1024) >> 10;
-  ranksCount += (handBits & 2048) >> 11;
-  ranksCount += (handBits & 4096) >> 12;
-  ranksCount += (handBits & 8192) >> 13;
-  ranksCount += (handBits & 16384) >> 14;
-  ranksCount += (handBits & 32786) >> 15;
-  ranksCount += (handBits & 65536) >> 16;
+  var self = arguments.callee;
 
-  //Detect the characteristic of a hand
-  //FIXME: this is for 5 cards game, not 7
+  var handHash = cards[0] | cards[1] | cards[2] | cards[3] | cards[4] | cards[5] | cards[6];
+  var suitsCount = 0, ranksCount = 0;
+  suitsCount += (handHash & 1) >> 0;
+  suitsCount += (handHash & 2) >> 1;
+  suitsCount += (handHash & 4) >> 2;
+  suitsCount += (handHash & 8) >> 3;
+  ranksCount += (handHash & 16) >> 4;
+  ranksCount += (handHash & 32) >> 5;
+  ranksCount += (handHash & 64) >> 6;
+  ranksCount += (handHash & 128) >> 7;
+  ranksCount += (handHash & 256) >> 8;
+  ranksCount += (handHash & 512) >> 9;
+  ranksCount += (handHash & 1024) >> 10;
+  ranksCount += (handHash & 2048) >> 11;
+  ranksCount += (handHash & 4096) >> 12;
+  ranksCount += (handHash & 8192) >> 13;
+  ranksCount += (handHash & 16384) >> 14;
+  ranksCount += (handHash & 32786) >> 15;
+  ranksCount += (handHash & 65536) >> 16;
+
+  var cardsByRank = cards.slice.sort(function(left,right) {return left < right ? -1 : 1});
+  var cardsBySuit = cards.slice.sort(function(left,right) {return (left & 15) < (right & 15) ? -1 : 1});
+  var sortedRanks = [], sortedSuits = [];
+  sortedRanks[0] = cardsByRank[0] & ~15;
+  sortedRanks[1] = cardsByRank[1] & ~15;
+  sortedRanks[2] = cardsByRank[2] & ~15;
+  sortedRanks[3] = cardsByRank[3] & ~15;
+  sortedRanks[4] = cardsByRank[4] & ~15;
+  sortedRanks[5] = cardsByRank[5] & ~15;
+  sortedRanks[6] = cardsByRank[6] & ~15;
+  sortedSuits[0] = cardsBySuit[0] & 15;
+  sortedSuits[1] = cardsBySuit[1] & 15;
+  sortedSuits[2] = cardsBySuit[2] & 15;
+  sortedSuits[3] = cardsBySuit[3] & 15;
+  sortedSuits[4] = cardsBySuit[4] & 15;
+  sortedSuits[5] = cardsBySuit[5] & 15;
+  sortedSuits[6] = cardsBySuit[6] & 15;
+
   if (false) {
-  } else if (ranksCount === 4) {
+  } else if (self.isStraight(sortedRanks) && self.isFlush(sortedSuits)) {
+    return 'straight_flush';
+  } else if (ranksCount === 2 || ( ranksCount >= 2 && ranksCount <= 4 && self.isFourOfAKind(sortedRanks))) {
+    return 'four_of_a_kind';
+  } else if ((ranksCount === 3 || ranksCount === 4) && self.isFullHouse(sortedRanks)) {
+    return 'full_house';
+  } else if (suitsCount <= 3 && self.isFlush(sortedSuits)) {
+    return 'flush';
+  } else if (ranksCount >= 5 && self.isStraight(sortedRanks)) {
+    return 'straight';
+  } else if ((ranksCount === 4 || ranksCount === 5) && self.isThreeOfAKind(sortedRanks)) {
+    return 'three_of_a_kind';
+  } else if ((ranksCount === 4 || ranksCount === 5) && self.isTwoPair(sortedRanks)) {
+    return 'two_pair';
+  } else if (ranksCount === 6) {
     return 'one_pair';
-  } else if (ranksCount === 3) {
-    return (cards[0] & cards[1] & cards[2]) >> 4 << 4 !== 0 ||
-           (cards[1] & cards[2] & cards[3]) >> 4 << 4 !== 0 ||
-           (cards[2] & cards[3] & cards[4]) >> 4 << 4 !== 0
-           ? 'three_of_a_kind' : 'two_pair';
-  } else if (suitsCount > 1 && ranksCount === 5 && Holdem.straigh[ranksBits]) {
-    return 'straigh';
-  } else if (suitsCount === 1 && ranksCount === 5) {
-    return Holdem.straigh[ranksBits] ? 'straigh_flush' : 'flush';
-  } else if (ranksCount === 2) {
-    cards.sort(function(left,right) {return left < right ? -1 : 1});
-    return (cards[1] & cards[2]) >> 4 << 4 !== 0 &&
-           (cards[2] & cards[3]) >> 4 << 4 !== 0
-           ? 'four_of_a_kind' : 'full_house';
   } else {
     return 'high_cards';
   }
 };
 
-Holdem.randomInt = function() {
-  return parseInt(Math.random() * 2147483647);
+// The cards passed into the following functions must be sorted
+
+Holdem.hand.isFourOfAKind = function(ranks) {
+  return ranks[0] === ranks[3] ||
+         ranks[1] === ranks[4] ||
+         ranks[2] === ranks[5] ||
+         ranks[3] === ranks[6] ||
+         false;
+};
+
+Holdem.hand.isFullHouse = function(ranks) {
+  return Holdem.hand.isThreeOfAKind(ranks) && (
+         (ranks[0] === ranks[1] && ranks[1] !== ranks[2]) ||
+         (ranks[1] === ranks[2] && ranks[1] !== ranks[0] && ranks[2] !== ranks[3]) ||
+         (ranks[2] === ranks[3] && ranks[2] !== ranks[1] && ranks[3] !== ranks[4]) ||
+         (ranks[3] === ranks[4] && ranks[3] !== ranks[2] && ranks[4] !== ranks[5]) ||
+         (ranks[4] === ranks[5] && ranks[4] !== ranks[3] && ranks[5] !== ranks[6]) ||
+         (ranks[5] === ranks[6] && ranks[5] !== ranks[4]) ||
+         false);
+};
+
+Holdem.hand.isFlush = function(suits) {
+  return suits[0] === suits[4] ||
+         suits[1] === suits[5] ||
+         suits[3] === suits[6] ||
+         false;
+};
+
+Holdem.hand.isStraight = function(ranks) {
+  return false ||
+         (ranks[0] << 1 === ranks[1] && ranks[1] << 1 === ranks[2] &&
+          ranks[2] << 1 === ranks[3] && ranks[3] << 1 === ranks[4]) ||
+         (ranks[1] << 1 === ranks[2] && ranks[2] << 1 === ranks[3] &&
+          ranks[3] << 1 === ranks[4] && ranks[4] << 1 === ranks[5]) ||
+         (ranks[2] << 1 === ranks[3] && ranks[4] << 1 === ranks[5] &&
+          ranks[5] << 1 === ranks[6] && ranks[6] << 1 === ranks[7]) ||
+         false;
+};
+
+Holdem.hand.isThreeOfAKind = function(ranks) {
+  return ranks[0] === ranks[2] ||
+         ranks[1] === ranks[3] ||
+         ranks[2] === ranks[4] ||
+         ranks[3] === ranks[5] ||
+         ranks[4] === ranks[6] ||
+         false;
+};
+
+Holdem.hand.isTwoPair = function(cards) {
 };
 
 Holdem.suit = {
@@ -204,7 +270,7 @@ Holdem.flush = {
 };
 */
 
-Holdem.straigh = {
+Holdem.hand.straight = {
   126976 : ['A', 'K', 'Q', 'J', '10'],
   63488  : ['K', 'Q', 'J', '10', '9'],
   31744  : ['Q', 'J', '10', '9', '8'],
@@ -217,19 +283,21 @@ Holdem.straigh = {
   65776  : ['5', '4', '3', '2', 'A' ],
 };
 
-Holdem.handValue = {
-  'straigh_flush'   : 8,
+Holdem.hand.value = {
+  'straight_flush'   : 8,
   'four_of_a_kind'  : 7,
   'full_house'      : 6,
   'flush'           : 5,
-  'straigh'         : 4,
+  'straight'         : 4,
   'three_of_a_kind' : 3,
   'two_pair'        : 2,
   'one_pair'        : 1,
   'high_cards'      : 0,
 };
 
-
+Holdem.randomInt = function() {
+  return parseInt(Math.random() * 2147483647);
+};
 
 exports.Holdem = Holdem;
 
