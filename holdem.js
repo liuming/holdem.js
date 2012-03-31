@@ -4,7 +4,7 @@ var Holdem = function() {};
 
 Holdem.Game = function(id) {
   var self = this;
-  var state = 0, pot = 0, players = [], currentPlayer;
+  var state = 0, pot = 0, players = [], currentPlayer, lastBetAmount = 0;
 
   this.id = function() { return id; };
   this.pot = function() { return pot; };
@@ -25,7 +25,7 @@ Holdem.Game = function(id) {
   };
 
   this.start = function() {
-    if (players.length <= 2) throw "Not enought player";
+    if (players.length < 2) throw "NOT_ENOUGH_PLAYER";
 
     currentPlayer = players[0];
     state |= 1;
@@ -59,9 +59,13 @@ Holdem.Game = function(id) {
   };
 
   this.call = function() {
+    self.bet(lastBetAmount);
   };
 
   this.raise = function(amount) {
+    if (amount <= lastBetAmount) return "AMOUNT_TOO_SMALL";
+
+    self.bet(amount);
   };
 
   this.fold = function() {
