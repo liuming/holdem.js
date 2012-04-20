@@ -18,9 +18,9 @@ assert.deepEqual(game.addPlayer(players[2]), [players[1], players[2]]);
 assert.deepEqual(game.addPlayer(players[3]), [players[1], players[2], players[3]]);
 
 game.start();
-assert.equal(game.currentPlayer(), players[1]);
+assert.equal(game.currentPlayer, players[1]);
 game.check();
-assert.equal(game.currentPlayer(), players[2]);
+assert.equal(game.currentPlayer, players[2]);
 
 assert.equal(Holdem.card(), undefined);
 assert.equal(Holdem.card('2', 'spades'), 24);

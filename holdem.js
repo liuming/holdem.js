@@ -4,80 +4,88 @@ var Holdem = function() {};
 
 Holdem.Game = function(id) {
   var self = this;
-  var state = 0, pot = 0, players = [], currentPlayer, lastBetAmount = 0;
 
-  this.id = function() { return id; };
-  this.pot = function() { return pot; };
-  this.hasSmallBlind = function() { return state & 2 === 0 ? false : true; };
-  this.hasBigBlind = function() { return state & 4 === 0 ? false : true; };
-  this.allPlayers = function() { return players.slice(); };
-  this.currentPlayer = function() { return currentPlayer; };
+  this.state = 0;
+  this.pot = 0;
+  this.players = [];
+  this.currentPlayer = undefined;
+  this.lastBetAmount = 0;
+  this.id = id || Holdem.randomInt();
+};
 
-  this.addPlayer = function(player) {
-    if (player instanceof Holdem.Player && players.indexOf(player) === -1) players.push(player);
-    return self.allPlayers();
-  };
+Holdem.Game.prototype = {
+  hasSmallBlind: function() {
+    return this.state & 2 === 0 ? false : true;
+  },
 
-  this.removePlayer = function(player) {
-    var index = players.indexOf(player);
-    if (player instanceof Holdem.Player && index !== -1) players.splice(index, 1);
-    return self.allPlayers();
-  };
+  hasBigBlind: function() {
+    return this.state & 4 === 0 ? false : true;
+  },
 
-  this.start = function() {
-    if (players.length < 2) throw "NOT_ENOUGH_PLAYER";
+  addPlayer: function(player) {
+    if (player instanceof Holdem.Player && this.players.indexOf(player) === -1) this.players.push(player);
+    return this.players;
+  },
 
-    currentPlayer = players[0];
-    state |= 1;
-  };
+  removePlayer: function(player) {
+    var index = this.players.indexOf(player);
+    if (player instanceof Holdem.Player && index !== -1) this.players.splice(index, 1);
+    return this.players;
+  },
 
-  this.availableActions = function() {
-    if (currentPlayer.isFolded()) return [];
-    if (self.hasSmallBlind() === false) return ['small', 'fold'];
-    if (self.hasBigBlind() === false) return ['big', 'fold'];
+  nextPlayer: function() {
+    var index = (this.players.indexOf(this.currentPlayer) + 1) % this.players.length;
+    return this.currentPlayer = this.players[index];
+  },
+
+  start: function() {
+    if (this.players.length < 2) throw "NOT_ENOUGH_PLAYER";
+
+    this.currentPlayer = this.players[0];
+    this.state |= 1;
+  },
+
+  availableActions: function() {
+    if (this.currentPlayer.isFolded()) return [];
+    if (this.hasSmallBlind() === false) return ['small', 'fold'];
+    if (this.hasBigBlind() === false) return ['big', 'fold'];
 
     return ['call', 'raise', 'fold'];
-  };
+  },
 
-  this.bet = function(amount) {
-    currentPlayer.transfer(-1 * Math.abs(amount));
-    pot += amount;
-  };
+  bet: function(amount) {
+    this.currentPlayer.transfer(-1 * Math.abs(amount));
+    this.pot += amount;
+  },
 
-  this.smallBlind = function(amount) {
-    self.bet(amount);
-    state |= 2;
-  };
+  smallBlind: function(amount) {
+    this.bet(amount);
+    this.state |= 2;
+  },
 
-  this.bigBlind = function(amount) {
-    self.bet(amount);
-    state |= 4;
-  };
+  bigBlind: function(amount) {
+    this.bet(amount);
+    this.state |= 4;
+  },
 
-  this.check = function() {
-    nextPlayer();
-  };
+  check: function() {
+    this.nextPlayer();
+  },
 
-  this.call = function() {
-    self.bet(lastBetAmount);
-  };
+  call: function() {
+    this.bet(lastBetAmount);
+  },
 
-  this.raise = function(amount) {
-    if (amount <= lastBetAmount) return "AMOUNT_TOO_SMALL";
+  raise: function(amount) {
+    if (amount <= this.lastBetAmount) return "AMOUNT_TOO_SMALL";
 
-    self.bet(amount);
-  };
+    this.bet(amount);
+  },
 
-  this.fold = function() {
-    currentPlayer.fold();
-  };
+  fold: function() {
+    this.currentPlayer.fold();
+  },
 
-  var nextPlayer = function() {
-    var index = (players.indexOf(currentPlayer) + 1) % players.length;
-    return currentPlayer = players[index];
-  };
-
-  id = id || Holdem.randomInt();
 };
 
 Holdem.Player = function(name) {
