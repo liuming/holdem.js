@@ -14,13 +14,6 @@ Holdem.Game = function(id) {
 };
 
 Holdem.Game.prototype = {
-  hasSmallBlind: function() {
-    return this.state & 2 === 0 ? false : true;
-  },
-
-  hasBigBlind: function() {
-    return this.state & 4 === 0 ? false : true;
-  },
 
   addPlayer: function(player) {
     if (player instanceof Holdem.Player && this.players.indexOf(player) === -1) this.players.push(player);
@@ -54,7 +47,8 @@ Holdem.Game.prototype = {
   },
 
   bet: function(amount) {
-    this.currentPlayer.transfer(-1 * Math.abs(amount));
+    amount = Math.abs(amount);
+    this.currentPlayer.transfer(-1 * amount);
     this.pot += amount;
   },
 
@@ -66,6 +60,14 @@ Holdem.Game.prototype = {
   bigBlind: function(amount) {
     this.bet(amount);
     this.state |= 4;
+  },
+
+  hasSmallBlind: function() {
+    return this.state & 2 === 0 ? false : true;
+  },
+
+  hasBigBlind: function() {
+    return this.state & 4 === 0 ? false : true;
   },
 
   check: function() {
