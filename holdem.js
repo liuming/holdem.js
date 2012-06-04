@@ -79,7 +79,7 @@ Holdem.Game.prototype = {
   },
 
   raise: function(amount) {
-    if (amount <= this.lastBetAmount) return "AMOUNT_TOO_SMALL";
+    if (amount <= this.lastBetAmount) throw "AMOUNT_TOO_SMALL";
 
     this.bet(amount);
   },
@@ -144,8 +144,8 @@ Holdem.hand = function(cards) {
   ranksCount += (handHash & 32786) >> 15;
   ranksCount += (handHash & 65536) >> 16;
 
-  var cardsByRank = cards.slice.sort(function(left,right) {return left < right ? -1 : 1});
-  var cardsBySuit = cards.slice.sort(function(left,right) {return (left & 15) < (right & 15) ? -1 : 1});
+  var cardsByRank = cards.slice().sort(function(left,right) {return left < right ? -1 : 1});
+  var cardsBySuit = cards.slice().sort(function(left,right) {return (left & 15) < (right & 15) ? -1 : 1});
   var sortedRanks = [], sortedSuits = [];
   sortedRanks[0] = cardsByRank[0] & ~15;
   sortedRanks[1] = cardsByRank[1] & ~15;

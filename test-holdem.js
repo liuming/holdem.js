@@ -38,16 +38,14 @@ assert.equal(Holdem.hand.isFlush([1, 1, 1, 1, 1, 2, 4, 8]), true);
 assert.equal(Holdem.hand.isStraight([16, 32, 64, 128, 256, 512, 1024]), true);
 assert.equal(Holdem.hand.isTwoPair([16, 16, 32, 32, 64, 128, 256]), true);
 
-/*
-assert.deepEqual(Holdem.hand([24, 40, 72, 136, 264]), 'straight_flush');
-assert.deepEqual(Holdem.hand([17, 18, 20, 24, 40]), 'four_of_a_kind');
-assert.deepEqual(Holdem.hand([17, 18, 20, 33, 34]), 'full_house');
-assert.deepEqual(Holdem.hand([24, 72, 264, 1032, 4104]), 'flush');
-assert.deepEqual(Holdem.hand([17, 34, 68, 136, 264]), 'straight');
-assert.deepEqual(Holdem.hand([17, 18, 20, 40, 72]), 'three_of_a_kind');
-assert.deepEqual(Holdem.hand([17, 18, 33, 34, 65]), 'two_pair');
-assert.deepEqual(Holdem.hand([17, 18, 33, 66, 132]), 'one_pair');
-*/
+assert.deepEqual(Holdem.hand([24, 40, 72, 136, 264, 1032, 2056]), 'straight_flush');
+assert.deepEqual(Holdem.hand([17, 18, 20, 24, 40, 132, 516]), 'four_of_a_kind');
+assert.deepEqual(Holdem.hand([17, 18, 20, 33, 34, 72, 264]), 'full_house');
+assert.deepEqual(Holdem.hand([24, 72, 264, 1032, 4104, 17, 34]), 'flush');
+assert.deepEqual(Holdem.hand([17, 34, 68, 136, 264, 1028, 4104]), 'straight');
+assert.deepEqual(Holdem.hand([17, 18, 20, 40, 72, 264, 1032]), 'three_of_a_kind');
+assert.deepEqual(Holdem.hand([17, 18, 33, 34, 65, 258, 1028]), 'two_pair');
+assert.deepEqual(Holdem.hand([17, 18, 33, 66, 132, 520, 2052]), 'one_pair');
 
 assert.notEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
 assert.notDeepEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
