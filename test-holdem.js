@@ -18,8 +18,12 @@ assert.deepEqual(game.addPlayer(players[2]), [players[1], players[2]]);
 assert.deepEqual(game.addPlayer(players[3]), [players[1], players[2], players[3]]);
 
 game.start();
+assert.equal(game.hasSmallBlind(), false);
+assert.ok(game.legalAction('small'));
+assert.ok(game.legalAction('fold'));
 assert.equal(game.currentPlayer, players[1]);
-game.check();
+assert.equal(game.smallBlind(5));
+game.nextPlayer();
 assert.equal(game.currentPlayer, players[2]);
 
 assert.equal(Holdem.card(), undefined);

@@ -46,6 +46,10 @@ Holdem.Game.prototype = {
     return ['call', 'raise', 'fold'];
   },
 
+  legalAction: function(action) {
+    return this.availableActions().indexOf(action) !== -1;
+  },
+
   bet: function(amount) {
     amount = Math.abs(amount);
     this.currentPlayer.transfer(-1 * amount);
@@ -53,29 +57,33 @@ Holdem.Game.prototype = {
   },
 
   smallBlind: function(amount) {
+    if (!this.legalAction('small')) throw "SMALL_BLIND_DENIED";
     this.bet(amount);
     this.state |= 2;
   },
 
   bigBlind: function(amount) {
+    if (!this.legalAction('big')) throw "BIG_BLIND_DENIED";
     this.bet(amount);
     this.state |= 4;
   },
 
   hasSmallBlind: function() {
-    return this.state & 2 === 0 ? false : true;
+    return (this.state & 2) === 0 ? false : true;
   },
 
   hasBigBlind: function() {
-    return this.state & 4 === 0 ? false : true;
+    return (this.state & 4) === 0 ? false : true;
   },
 
   check: function() {
+    if (!this.legalAction('check')) throw "CHECK_DENIED";
     this.nextPlayer();
   },
 
   call: function() {
-    this.bet(lastBetAmount);
+    if (!this.legalAction('call')) throw "CALL_DENIED";
+    this.bet(this.lastBetAmount);
   },
 
   raise: function(amount) {
