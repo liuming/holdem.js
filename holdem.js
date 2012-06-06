@@ -9,7 +9,7 @@ Holdem.Game = function(id) {
   this.pot = 0;
   this.players = [];
   this.currentPlayer = undefined;
-  this.lastBetAmount = 0;
+  this.minimumBet = 0;
   this.id = id || Holdem.randomInt();
 };
 
@@ -38,7 +38,7 @@ Holdem.Game.prototype = {
     this.state |= 1;
   },
 
-  availableActions: function() {
+  legalActions: function() {
     if (this.currentPlayer.isFolded()) return [];
     if (this.hasSmallBlind() === false) return ['small', 'fold'];
     if (this.hasBigBlind() === false) return ['big', 'fold'];
@@ -46,25 +46,27 @@ Holdem.Game.prototype = {
     return ['call', 'raise', 'fold'];
   },
 
-  legalAction: function(action) {
-    return this.availableActions().indexOf(action) !== -1;
+  isLegalAction: function(action) {
+    return this.legalActions().indexOf(action) !== -1;
   },
 
   bet: function(amount) {
     amount = Math.abs(amount);
+    if(amount < this.minimumBet) throw "BET_IS_TOO_SMALL";
     this.currentPlayer.transfer(-1 * amount);
     this.pot += amount;
+    return amount;
   },
 
   smallBlind: function(amount) {
-    if (!this.legalAction('small')) throw "SMALL_BLIND_DENIED";
-    this.bet(amount);
+    if (!this.isLegalAction('small')) throw "SMALL_BLIND_DENIED";
+    this.minimumBet = this.bet(amount);
     this.state |= 2;
   },
 
   bigBlind: function(amount) {
-    if (!this.legalAction('big')) throw "BIG_BLIND_DENIED";
-    this.bet(amount);
+    if (!this.isLegalAction('big')) throw "BIG_BLIND_DENIED";
+    this.minimumBet = this.bet(amount);
     this.state |= 4;
   },
 
@@ -77,12 +79,12 @@ Holdem.Game.prototype = {
   },
 
   check: function() {
-    if (!this.legalAction('check')) throw "CHECK_DENIED";
+    if (!this.isLegalAction('check')) throw "CHECK_DENIED";
     this.nextPlayer();
   },
 
   call: function() {
-    if (!this.legalAction('call')) throw "CALL_DENIED";
+    if (!this.isLegalAction('call')) throw "CALL_DENIED";
     this.bet(this.lastBetAmount);
   },
 

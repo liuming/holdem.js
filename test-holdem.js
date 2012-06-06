@@ -10,6 +10,7 @@ while(index++ < 4) {
   players.push(new Holdem.Player('Player' + index));
 };
 
+//Adding players
 assert.deepEqual(game.addPlayer(players[0]), [players[0]]);
 assert.deepEqual(game.addPlayer(players[0]), [players[0]]);
 assert.deepEqual(game.addPlayer(players[1]), [players[0], players[1]]);
@@ -17,24 +18,30 @@ assert.deepEqual(game.removePlayer(players[0]), [players[1]]);
 assert.deepEqual(game.addPlayer(players[2]), [players[1], players[2]]);
 assert.deepEqual(game.addPlayer(players[3]), [players[1], players[2], players[3]]);
 
+//Run the game flow
 game.start();
 assert.equal(game.hasSmallBlind(), false);
-assert.ok(game.legalAction('small'));
-assert.ok(game.legalAction('fold'));
+assert.deepEqual(game.legalActions(), ['small', 'fold']);
 assert.equal(game.currentPlayer, players[1]);
 assert.equal(game.smallBlind(5));
-game.nextPlayer();
-assert.equal(game.currentPlayer, players[2]);
+assert.ok(game.hasSmallBlind());
+assert.equal(game.nextPlayer(), players[2]);
+assert.deepEqual(game.legalActions(), ['big', 'fold']);
+assert.equal(game.bigBlind(5));
+assert.equal(game.nextPlayer(), players[3]);
+assert.deepEqual(game.legalActions(), ['call', 'raise', 'fold']);
 
+//Card to readable conversion
 assert.equal(Holdem.card(), undefined);
 assert.equal(Holdem.card('2', 'spades'), 24);
 assert.deepEqual(Holdem.card(24), {suit: 'spades', rank: '2'});
 assert.equal(Holdem.card('A', 'diamonds'), 65537);
 assert.deepEqual(Holdem.card(65537), {suit: 'diamonds', rank: 'A'});
-assert(Holdem.card('2', 'spades') > Holdem.card('2', 'hearts'));
-assert(Holdem.card('A', 'diamonds') > Holdem.card('2', 'spades'));
-assert(Holdem.card('A', 'diamonds') > Holdem.card('K', 'spades'));
+assert.ok(Holdem.card('2', 'spades') > Holdem.card('2', 'hearts'));
+assert.ok(Holdem.card('A', 'diamonds') > Holdem.card('2', 'spades'));
+assert.ok(Holdem.card('A', 'diamonds') > Holdem.card('K', 'spades'));
 
+//Hand detection
 assert.equal(Holdem.hand.isFourOfAKind([16, 16, 16, 16, 32, 64, 128]), true);
 assert.equal(Holdem.hand.isFullHouse([16, 16, 16, 32, 32, 64, 128, 256]), true);
 assert.equal(Holdem.hand.isFullHouse([16, 16, 16, 32, 64, 128, 256, 512]), false);
@@ -51,6 +58,7 @@ assert.deepEqual(Holdem.hand([17, 18, 20, 40, 72, 264, 1032]), 'three_of_a_kind'
 assert.deepEqual(Holdem.hand([17, 18, 33, 34, 65, 258, 1028]), 'two_pair');
 assert.deepEqual(Holdem.hand([17, 18, 33, 66, 132, 520, 2052]), 'one_pair');
 
+//Helper functions
 assert.notEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
 assert.notDeepEqual(Holdem.shuffle(Holdem.deck), Holdem.deck);
 
