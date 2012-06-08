@@ -6,7 +6,7 @@ var Holdem = require('./holdem.js').Holdem;
 var players = [], game = new Holdem.Game();
 
 var index = 0;
-while(index++ < 4) {
+while(index++ < 5) {
   players.push(new Holdem.Player('Player' + index));
 };
 
@@ -17,19 +17,25 @@ assert.deepEqual(game.addPlayer(players[1]), [players[0], players[1]]);
 assert.deepEqual(game.removePlayer(players[0]), [players[1]]);
 assert.deepEqual(game.addPlayer(players[2]), [players[1], players[2]]);
 assert.deepEqual(game.addPlayer(players[3]), [players[1], players[2], players[3]]);
+assert.deepEqual(game.addPlayer(players[4]), [players[1], players[2], players[3], players[4]]);
 
 //Run the game flow
 game.start();
 assert.equal(game.hasSmallBlind(), false);
 assert.deepEqual(game.legalActions(), ['small', 'fold']);
 assert.equal(game.currentPlayer, players[1]);
-assert.equal(game.smallBlind(5));
+assert.equal(game.smallBlind(5), 5);
 assert.ok(game.hasSmallBlind());
 assert.equal(game.nextPlayer(), players[2]);
 assert.deepEqual(game.legalActions(), ['big', 'fold']);
-assert.equal(game.bigBlind(5));
+assert.equal(game.bigBlind(10), 10);
 assert.equal(game.nextPlayer(), players[3]);
 assert.deepEqual(game.legalActions(), ['call', 'raise', 'fold']);
+assert.equal(game.call(), 10);
+assert.equal(game.nextPlayer(), players[4]);
+assert.deepEqual(game.legalActions(), ['call', 'raise', 'fold']);
+assert.equal(game.raise(20), 20);
+assert.equal(game.nextPlayer(), players[1]);
 
 //Card to readable conversion
 assert.equal(Holdem.card(), undefined);

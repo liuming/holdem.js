@@ -2,7 +2,7 @@
 
 var Holdem = function() {};
 
-Holdem.Game = function(id) {
+Holdem.Game = function(options) {
   var self = this;
 
   this.state = 0;
@@ -10,7 +10,7 @@ Holdem.Game = function(id) {
   this.players = [];
   this.currentPlayer = undefined;
   this.minimumBet = 0;
-  this.id = id || Holdem.randomInt();
+  this.id = Holdem.randomInt();
 };
 
 Holdem.Game.prototype = {
@@ -62,12 +62,14 @@ Holdem.Game.prototype = {
     if (!this.isLegalAction('small')) throw "ACTION_DENIED";
     this.minimumBet = this.bet(amount);
     this.state |= 2;
+    return amount;
   },
 
   bigBlind: function(amount) {
     if (!this.isLegalAction('big')) throw "ACTION_DENIED";
     this.minimumBet = this.bet(amount);
     this.state |= 4;
+    return amount;
   },
 
   hasSmallBlind: function() {
@@ -80,18 +82,16 @@ Holdem.Game.prototype = {
 
   check: function() {
     if (!this.isLegalAction('check')) throw "ACTION_DENIED";
-    this.nextPlayer();
   },
 
   call: function() {
     if (!this.isLegalAction('call')) throw "ACTION_DENIED";
-    this.bet(this.lastBetAmount);
+    return this.bet(this.minimumBet);
   },
 
   raise: function(amount) {
-    if (amount <= this.lastBetAmount) throw "AMOUNT_TOO_SMALL";
-
-    this.bet(amount);
+    if (amount <= this.minimumBet) throw "AMOUNT_TOO_SMALL";
+    return this.bet(amount);
   },
 
   fold: function() {
@@ -117,7 +117,6 @@ Holdem.Player.prototype = {
   fold: function() {
     this.state |= 2;
   }
-
 };
 
 Holdem.card = function() {
