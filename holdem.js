@@ -52,20 +52,20 @@ Holdem.Game.prototype = {
 
   bet: function(amount) {
     amount = Math.abs(amount);
-    if(amount < this.minimumBet) throw "BET_IS_TOO_SMALL";
+    if(amount < this.minimumBet) throw "AMOUNT_TOO_SMALL";
     this.currentPlayer.transfer(-1 * amount);
     this.pot += amount;
     return amount;
   },
 
   smallBlind: function(amount) {
-    if (!this.isLegalAction('small')) throw "SMALL_BLIND_DENIED";
+    if (!this.isLegalAction('small')) throw "ACTION_DENIED";
     this.minimumBet = this.bet(amount);
     this.state |= 2;
   },
 
   bigBlind: function(amount) {
-    if (!this.isLegalAction('big')) throw "BIG_BLIND_DENIED";
+    if (!this.isLegalAction('big')) throw "ACTION_DENIED";
     this.minimumBet = this.bet(amount);
     this.state |= 4;
   },
@@ -79,12 +79,12 @@ Holdem.Game.prototype = {
   },
 
   check: function() {
-    if (!this.isLegalAction('check')) throw "CHECK_DENIED";
+    if (!this.isLegalAction('check')) throw "ACTION_DENIED";
     this.nextPlayer();
   },
 
   call: function() {
-    if (!this.isLegalAction('call')) throw "CALL_DENIED";
+    if (!this.isLegalAction('call')) throw "ACTION_DENIED";
     this.bet(this.lastBetAmount);
   },
 
@@ -101,17 +101,23 @@ Holdem.Game.prototype = {
 };
 
 Holdem.Player = function(name) {
-  var id, credits = 0, state = 0;
+  this.id = Holdem.randomInt();
+  this.name = name;
+  this.credits = 0;
+  this.state = 0;
+};
 
-  this.id = function() { return id; };
-  this.name = function() { return name; };
-  this.credits = function() { return credits };
-  this.isFolded = function() { return (state & 2) === 0 ? false : true ;};
+Holdem.Player.prototype = {
+  isFolded: function() {
+    return (this.state & 2) === 0 ? false : true;
+  },
+  transfer: function(amount) {
+    this.credits += amount;
+  },
+  fold: function() {
+    this.state |= 2;
+  }
 
-  this.transfer = function(amount) { credits += amount };
-  this.fold = function() { state |= 2 };
-
-  id = id || Holdem.randomInt();
 };
 
 Holdem.card = function() {
